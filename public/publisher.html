@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEXXVIKALZ — Web Publisher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper: #FFFBE8;
+  --ink: #111;
+  --purple: #7B2FBE;
+  --purple-dark: #5a1f8c;
+  --border: 3px solid #111;
+  --shadow: 5px 5px 0 #111;
+}
+
+body {
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, #00000009 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 100vh;
+  padding: 28px 16px 48px;
+  color: var(--ink);
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+  animation: headerPop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+.logo {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(52px, 13vw, 88px);
+  letter-spacing: 5px;
+  line-height: 1;
+  text-shadow: 5px 5px 0 rgba(123,47,190,0.25), 8px 8px 0 rgba(0,0,0,0.1);
+}
+.logo-dexx  { color: #111; }
+.logo-vikalz{ color: var(--purple); }
+
+.badge {
+  display: inline-block;
+  background: #111;
+  color: #fff;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(13px, 3vw, 18px);
+  letter-spacing: 6px;
+  padding: 3px 16px 2px;
+  border: 3px solid #111;
+  margin-top: 6px;
+}
+
+/* ── PANEL ── */
+.panel {
+  max-width: 560px;
+  margin: 0 auto;
+  background: #fff;
+  border: var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 3px;
+  padding: 26px 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.halftone {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 80px; height: 80px;
+  background-image: radial-gradient(circle, #7B2FBE22 2.5px, transparent 2.5px);
+  background-size: 10px 10px;
+  pointer-events: none;
+}
+.panel-title {
+  font-family: 'Bangers', cursive;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--purple);
+  border-bottom: 3px solid #111;
+  padding-bottom: 10px;
+  margin-bottom: 22px;
+}
+
+/* ── FIELDS ── */
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-family: 'Bangers', cursive;
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.field-hint {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.field input[type="text"],
+.field input[type="password"] {
+  width: 100%;
+  padding: 11px 14px;
+  border: var(--border);
+  background: var(--paper);
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+  font-size: 15px;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+  outline: none;
+  transition: box-shadow .1s, transform .1s;
+  border-radius: 2px;
+}
+.field input:focus {
+  box-shadow: 4px 4px 0 var(--purple);
+  transform: translate(-1px, -1px);
+}
+
+
+
+/* ── DROPZONE ── */
+.dropzone {
+  border: 3px dashed #111;
+  background: var(--paper);
+  border-radius: 3px;
+  padding: 26px 16px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  transition: background .15s, border-color .15s, border-style .15s;
+  min-height: 110px;
+  justify-content: center;
+}
+.dropzone:hover, .dropzone.dragover {
+  background: #f0e6ff;
+  border-color: var(--purple);
+  border-style: solid;
+}
+.dropzone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+.dz-icon  { font-size: 36px; line-height: 1; }
+.dz-label {
+  font-family: 'Bangers', cursive;
+  font-size: 15px; letter-spacing: 1.5px;
+}
+.dz-sub { font-size: 11px; font-weight: 700; color: #777; }
+
+.file-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  background: var(--purple);
+  color: #fff;
+  padding: 5px 12px;
+  border: 2px solid #111;
+  box-shadow: 2px 2px 0 #111;
+  font-family: 'Bangers', cursive;
+  font-size: 14px;
+  letter-spacing: 1px;
+  max-width: 100%;
+  word-break: break-all;
+  border-radius: 2px;
+}
+.badge-x {
+  cursor: pointer;
+  margin-left: 4px;
+  flex-shrink: 0;
+  font-size: 13px;
+  opacity: .8;
+}
+.badge-x:hover { opacity: 1; }
+
+/* ── DEPLOY BUTTON ── */
+.btn-deploy {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: var(--purple);
+  color: #fff;
+  font-family: 'Bangers', cursive;
+  font-size: 22px;
+  letter-spacing: 3px;
+  border: 3px solid #111;
+  box-shadow: 5px 5px 0 #111;
+  cursor: pointer;
+  transition: all .1s;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.btn-deploy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.btn-deploy:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 #111;
+  background: var(--purple-dark);
+}
+.btn-deploy:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #111;
+}
+.btn-deploy:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* ── STATUS BUBBLE ── */
+.bubble-wrap { margin-top: 18px; }
+.bubble {
+  border: 3px solid #111;
+  padding: 14px 16px;
+  position: relative;
+  animation: popIn .28s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-radius: 3px;
+}
+/* tail */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -13px; left: 28px;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 13px solid #111;
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  top: -9px; left: 31px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid transparent; /* overridden per type */
+}
+.bubble.processing { background: #FFF9C4; }
+.bubble.processing::after { border-bottom-color: #FFF9C4; }
+.bubble.success { background: #D6F5E3; }
+.bubble.success::after { border-bottom-color: #D6F5E3; }
+.bubble.error { background: #FDE8EA; }
+.bubble.error::after { border-bottom-color: #FDE8EA; }
+
+.bubble-title {
+  font-family: 'Bangers', cursive;
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  margin-bottom: 7px;
+}
+.bubble-msg { font-size: 14px; font-weight: 700; line-height: 1.6; }
+
+/* result link */
+.result-link {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #111;
+  color: #fff;
+  font-family: 'Bangers', cursive;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  border: 2px solid #111;
+  word-break: break-all;
+  text-align: center;
+  transition: background .1s;
+  border-radius: 2px;
+}
+.result-link:hover { background: var(--purple); }
+
+.btn-copy {
+  margin-top: 8px;
+  padding: 6px 16px;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 2px 2px 0 #111;
+  font-family: 'Bangers', cursive;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all .1s;
+  border-radius: 2px;
+}
+.btn-copy:hover { background: var(--purple); color: #fff; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #111; }
+.btn-copy:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 #111; }
+
+/* ── DOTS LOADING ── */
+.dots span { display: inline-block; animation: dotBounce 1s infinite; }
+.dots span:nth-child(2) { animation-delay: .14s; }
+.dots span:nth-child(3) { animation-delay: .28s; }
+
+/* ── ANIMATIONS ── */
+@keyframes headerPop {
+  0%   { transform: scale(.8) rotate(-3deg); opacity: 0; }
+  60%  { transform: scale(1.06) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes popIn {
+  0%   { transform: scale(.85); opacity: 0; }
+  70%  { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes dotBounce {
+  0%,80%,100% { transform: translateY(0); }
+  40%          { transform: translateY(-8px); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-5px); }
+  40%     { transform: translateX(5px); }
+  60%     { transform: translateX(-3px); }
+  80%     { transform: translateX(3px); }
+}
+.shake { animation: shake .4s; }
+
+/* STARBURST overlay */
+.starburst-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 999;
+  animation: overlayFade .7s ease-out forwards;
+}
+.starburst-overlay span {
+  font-size: 90px;
+  animation: starBurst .7s ease-out forwards;
+  display: block;
+}
+@keyframes overlayFade { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
+@keyframes starBurst {
+  0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+  60%  { transform: scale(1.4) rotate(30deg); opacity: 1; }
+  100% { transform: scale(2) rotate(60deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span class="logo-dexx">DEXX</span><span class="logo-vikalz">VIKALZ</span>
+  </div>
+  <div class="badge">⚡ WEB PUBLISHER ⚡</div>
+</div>
+
+<div class="panel" id="mainPanel">
+  <div class="halftone"></div>
+
+  <div class="panel-title">📦 DEPLOY YOUR SITE</div>
+
+  <!-- Nama Web -->
+  <div class="field">
+    <label>🌐 NAMA WEB / PROJECT</label>
+    <input type="text" id="webName" placeholder="contoh: toko-online-ku" maxlength="52">
+    <div class="field-hint">Hanya huruf kecil, angka, dan tanda hubung (-). Spasi otomatis dikonversi.</div>
+  </div>
+
+  <!-- Upload File -->
+  <div class="field">
+    <label>📁 UPLOAD FILE</label>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept=".html,.zip" onchange="handleFile(this.files[0])">
+      <div class="dz-icon" id="dzIcon">📂</div>
+      <div class="dz-label" id="dzLabel">KLIK ATAU DROP FILE DI SINI</div>
+      <div class="dz-sub">Format: .html atau .zip — maks 10MB</div>
+    </div>
+    <div class="file-badge" id="fileBadge">
+      <span id="badgeIcon">📄</span>
+      <span id="badgeName" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px;"></span>
+      <span class="badge-x" onclick="clearFile()">✕</span>
+    </div>
+    <div class="field-hint">ZIP: pastikan <strong>index.html</strong> ada di root folder. HTML: langsung upload satu file.</div>
+  </div>
+
+  <!-- Deploy Button -->
+  <button class="btn-deploy" id="deployBtn" onclick="deploy()">
+    🚀 DEPLOY SEKARANG
+  </button>
+
+  <div id="statusArea" class="bubble-wrap" style="display:none;"></div>
+</div>
+
+<script>
+'use strict';
+
+let selectedFile = null;
+
+/* ── DRAG & DROP ── */
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['html', 'zip'].includes(ext)) {
+    showBubble('error', '❌ FORMAT SALAH', 'Hanya file .html atau .zip yang diterima.');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showBubble('error', '❌ FILE TERLALU BESAR', 'Maksimal ukuran file adalah 10MB.');
+    return;
+  }
+  selectedFile = file;
+  document.getElementById('fileBadge').style.display = 'inline-flex';
+  document.getElementById('badgeName').textContent = file.name;
+  document.getElementById('badgeIcon').textContent = ext === 'zip' ? '🗜️' : '📄';
+  document.getElementById('dzIcon').textContent = '✅';
+  document.getElementById('dzLabel').textContent = 'FILE SIAP DEPLOY!';
+  document.getElementById('statusArea').style.display = 'none';
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('fileBadge').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('dzIcon').textContent = '📂';
+  document.getElementById('dzLabel').textContent = 'KLIK ATAU DROP FILE DI SINI';
+  document.getElementById('statusArea').style.display = 'none';
+}
+
+/* ── SANITIZE ── */
+function sanitize(name) {
+  return name.toLowerCase().trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 50) || 'my-site';
+}
+
+/* ── STATUS BUBBLE ── */
+function showBubble(type, title, msg, extra = '') {
+  const area = document.getElementById('statusArea');
+  area.style.display = 'block';
+  area.innerHTML = `
+    <div class="bubble ${type}">
+      <div class="bubble-title">${title}</div>
+      <div class="bubble-msg">${msg}</div>
+      ${extra}
+    </div>`;
+}
+
+function showLoading(msg) {
+  const area = document.getElementById('statusArea');
+  area.style.display = 'block';
+  area.innerHTML = `
+    <div class="bubble processing">
+      <div class="bubble-title">⚙️ MEMPROSES<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+      <div class="bubble-msg">${msg}</div>
+    </div>`;
+}
+
+/* ── FILE READERS ── */
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── ZIP EXTRACTOR ── */
+async function filesFromZip(zipFile) {
+  const buf = await zipFile.arrayBuffer();
+  const zip = await JSZip.loadAsync(buf);
+  const entries = [];
+
+  for (const [path, entry] of Object.entries(zip.files)) {
+    if (entry.dir || !path) continue;
+    const data = await entry.async('base64');
+    entries.push({ file: path, data, encoding: 'base64' });
+  }
+
+  /* strip single root folder if all files share it */
+  if (entries.length > 0) {
+    const firstSlash = entries[0].file.indexOf('/');
+    if (firstSlash > 0) {
+      const root = entries[0].file.slice(0, firstSlash + 1);
+      if (entries.every(f => f.file.startsWith(root))) {
+        entries.forEach(f => f.file = f.file.slice(root.length));
+      }
+    }
+  }
+
+  return entries.filter(f => f.file);
+}
+
+/* ── POLL DEPLOYMENT ── */
+async function poll(token, id, maxTries = 40) {
+  for (let i = 0; i < maxTries; i++) {
+    await new Promise(r => setTimeout(r, 3500));
+    const r = await fetch(`/api/deploy/${id}`);
+    const d = await r.json();
+    const state = d.readyState || d.status || '';
+    if (state === 'READY') return d.url;
+    if (state === 'ERROR' || state === 'CANCELED') throw new Error(`Deployment ${state.toLowerCase()} di server Vercel.`);
+    showLoading(`Build sedang berjalan… status: <strong>${state || 'BUILDING'}</strong> (${i + 1}/${maxTries})`);
+  }
+  throw new Error('Timeout: deployment terlalu lama. Cek dashboard Vercel kamu.');
+}
+
+/* ── DEPLOY ── */
+async function deploy() {
+  const name  = document.getElementById('webName').value.trim();
+  
+
+  /* validate */
+  if (!name) {
+    document.getElementById('webName').classList.remove('shake');
+    void document.getElementById('webName').offsetWidth;
+    document.getElementById('webName').classList.add('shake');
+    showBubble('error', '❌ OI!', 'Isi nama web dulu bos.');
+    return;
+  }
+  if (!selectedFile) {
+    showBubble('error', '❌ OI!', 'Upload file dulu bro, belum ada yang dipilih.');
+    return;
+  }
+
+  const btn = document.getElementById('deployBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ DEPLOYING…';
+
+  try {
+    const ext = selectedFile.name.split('.').pop().toLowerCase();
+    let files;
+
+    if (ext === 'zip') {
+      showLoading('Mengekstrak file ZIP…');
+      files = await filesFromZip(selectedFile);
+      const hasIndex = files.some(f => f.file === 'index.html');
+      if (!hasIndex) {
+        showBubble('error', '❌ TIDAK ADA INDEX.HTML!',
+          'ZIP harus mengandung <strong>index.html</strong> di root. Cek struktur folder kamu.');
+        btn.disabled = false;
+        btn.textContent = '🚀 DEPLOY SEKARANG';
+        return;
+      }
+    } else {
+      showLoading('Membaca file HTML…');
+      const data = await fileToBase64(selectedFile);
+      files = [{ file: 'index.html', data, encoding: 'base64' }];
+    }
+
+    const projectName = sanitize(name);
+    showLoading(`Mengirim ke Vercel sebagai "<strong>${projectName}</strong>"…`);
+
+    const resp = await fetch('/api/deploy', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: projectName,
+        files,
+        target: 'production',
+        projectSettings: { framework: null }
+      })
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      const msg = data?.error?.message || data?.message || JSON.stringify(data);
+      throw new Error(msg);
+    }
+
+    const deployId = data.id;
+    let finalUrl   = data.url;
+
+    if (data.readyState !== 'READY' && data.status !== 'READY') {
+      showLoading(`Deployment dimulai (ID: <code>${deployId?.slice(0, 14)}…</code>) — Menunggu build…`);
+      finalUrl = await poll(token, deployId);
+    }
+
+    const liveUrl = `https://${finalUrl}`;
+    boom();
+
+    showBubble('success', '🎉 BERHASIL DEPLOY!',
+      `Project <strong>${projectName}</strong> sekarang sudah live!`,
+      `<a class="result-link" href="${liveUrl}" target="_blank" rel="noopener">🔗 ${liveUrl}</a>
+       <button class="btn-copy" id="copyBtn" onclick="copyLink('${liveUrl}')">📋 COPY LINK</button>`
+    );
+
+  } catch (err) {
+    console.error(err);
+    const msg = err.message || 'Terjadi kesalahan tak terduga.';
+    showBubble('error', '💥 GAGAL!', `${msg}<br><br>Cek: token valid? file ada index.html?`);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 DEPLOY SEKARANG';
+}
+
+/* ── COPY LINK ── */
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const b = document.getElementById('copyBtn');
+    if (b) { b.textContent = '✅ TERSALIN!'; setTimeout(() => { if(b) b.textContent = '📋 COPY LINK'; }, 2200); }
+  }).catch(() => {
+    /* fallback */
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+/* ── STARBURST ── */
+function boom() {
+  const el = document.createElement('div');
+  el.className = 'starburst-overlay';
+  el.innerHTML = '<span>🎊</span>';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+</script>
+</body>
+</html>
